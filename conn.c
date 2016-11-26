@@ -19,15 +19,15 @@ int main(){
 void contract(char s1[], char s2[]){
 	char firstChar;
 	char lastChar;
-	
 	int location = 0;
 	int i;
 	
 	for(i=0; i<strlen(s1); ++i){
 		firstChar = s1[i];
-		if((s1[i]+1) == s1[i+1] && s1[i+1] != '\0'){
-			if((s1[i+1]+1) == s1[i+2] && s1[i+2] != '\0'){
-				while((s1[i]+1) == s1[i+1] && s1[i+1] != '\0'){
+		/* checks for 3 following ASCII notes */
+ 		if((s1[i]+1) == s1[i+1] && s1[i+1] != '\0' && (s1[i+1]+1) == s1[i+2] && s1[i+2] != '\0' ){
+				while((s1[i]+1) == s1[i+1] && s1[i+1] != '\0'){ /* stops when the next char is not a following
+																	ASCII value or if its the end of the array */
 					lastChar = s1[i+1];
 					i++;
 				}
@@ -37,18 +37,13 @@ void contract(char s1[], char s2[]){
 				++location;
 				s2[location] = lastChar;
 				++location;
-			}
-				
-			
 		}else{
 			if(firstChar)
 			s2[location] = firstChar;
 			++location;
 		}
 	}
-	s2[location] = '\0'; /* to clear any garbage values in s2 after the end of the wanted array */
+	s2[location] = '\0'; /* to clear any trash values in s2 after the end of the wanted array */
 }
 
 
-/* תרגיל לבית - יש משתנה int x בעל סיביות a,b,c,d,e,f אנחנו רוצים להחליף בין סיבית לסיבית
-*/
