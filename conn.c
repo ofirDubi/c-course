@@ -1,28 +1,34 @@
 #include <stdio.h>
 #include <string.h>
-#define MAXLENGTH 100
-void contract(char s1[], char s2[]);
+#define MAXLENGTH 100 /* the max length of the string that the program recieves as input */
 
+void contract(char s1[], char s2[]); /* declaring the function contract so it can be used in main */
+
+/*main function */
 int main(){
-	char s1[MAXLENGTH];
-	char s2[MAXLENGTH];
+	char s1[MAXLENGTH]; /* the first String */
+	char s2[MAXLENGTH]; /* the second String */
 	printf("enter the string to s1\n");
-	gets(s1);
-	printf("s2 = %s\n", s2);
-	printf("s1 = %s\n", s1);
+	gets(s1); /* puts the users string input into s1 */
+	
 	contract(s1, s2);
-	printf("s2 = %s\n", s2);
+	printf("s2 = %s\n", s2); /* print s2, to see if the contract worked */
 	return 0;
 }
-/* i want to check if 'char+1 = next_char, if so put them together, and keep on going
-	until its not true */
+/* the function contract recives 2 strinngs, s1 and s2. It copy's the string from s1
+	to s2 in a shorted format - each 3 or more following characters (determened by their ASCII value) 
+	will be represented like this: firstChar-lastChar.
+	for example: abcd => a-d.
+
+*/
 void contract(char s1[], char s2[]){
-	char firstChar;
-	char lastChar;
-	int location = 0;
-	int i;
+	char firstChar, lastChar; /*define the first char in a possible ASCII sequence and the last char in 
+								that sequence*/
 	
-	for(i=0; i<strlen(s1); ++i){
+	int i, location = 0; /*the location to put the current char from s1 in s2 */
+
+	
+	for(i=0; i<strlen(s1); ++i){ 
 		firstChar = s1[i];
 		/* checks for 3 following ASCII notes */
  		if((s1[i]+1) == s1[i+1] && s1[i+1] != '\0' && (s1[i+1]+1) == s1[i+2] && s1[i+2] != '\0' ){
@@ -38,7 +44,7 @@ void contract(char s1[], char s2[]){
 				s2[location] = lastChar;
 				++location;
 		}else{
-			if(firstChar)
+		
 			s2[location] = firstChar;
 			++location;
 		}

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#define MAXLENGTH 100 /* a buffer size of 100 for the vectors*/
 /*declaring the funciton that will calculate the scalar product
 	vec1[] => the first vector
 	vec2[] => the second vector
@@ -8,11 +9,10 @@
 int scalar_product(int vec1[], int vec2[], int arrayLength);
 
 int main(){
-	int i, length =0; /* i is used for the loop, length is the 
-						length of the array */
-	/*declaring the vectors, with a buffer size of 100 */
-	int vec1[100];
-	int vec2[100];
+	int i, length =0; /* length represents the length of the array */
+	
+	int vec1[MAXLENGTH];
+	int vec2[MAXLENGTH];
 	
 	printf("enter length of the vectors: \n");
 	scanf("%d", &length); /* askikng the user for the vector length*/
