@@ -31,7 +31,7 @@ void contract(char s1[], char s2[]){
 	for(i=0; i<strlen(s1); ++i){ 
 		firstChar = s1[i];
 		/* checks for 3 following ASCII notes */
- 		if((s1[i]+1) == s1[i+1] && s1[i+1] != '\0' && (s1[i+1]+1) == s1[i+2] && s1[i+2] != '\0' ){
+ 		if((s1[i]+1) == s1[i+1] && s1[i+1] != '\0' /* separate if */ && (s1[i+1]+1) == s1[i+2] && s1[i+2] != '\0' ){
 				while((s1[i]+1) == s1[i+1] && s1[i+1] != '\0'){ /* stops when the next char is not a following
 																	ASCII value or if its the end of the array */
 					lastChar = s1[i+1];
