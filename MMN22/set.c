@@ -1,124 +1,180 @@
 #include "set.h"
 
-/*change char to malloc(or somthing like that) */
-
- 
-void callFunc
-
-set A,B,C,D,E,F;
-char bool  = 1; /*true */
-int main(){
-	char input[MAXLENGTH];
-	char command[MAXLENGTH];
-	while(bool){
-		printf("enter the wanted command. list of commands:\n%s",
-		"print_set, read_set, union_set, intersect_set, sub_set, halt\n ##");
-		gets(input);
-		command = strtok((input)," ") 
-	
-		if(strcmp(command,"print_set") == 0){
-			command = strtok(NULL, " ")
-			switch (input[0]){
-			case 'A': strcpy(A, S);
-					printf("set is A\n");
-			case 'B' : strcpy(B, S);
-			case 'C' : strcpy(C, S);
-			case 'D' : strcpy(D, S);
-			case 'E' : strcpy(E, S);
-			case 'F' : strcpy(F, S);
-			case default: printf("no such group as %c\n",input[0] )
+void assingSet(set S, char setName){
+	switch (setName){
+		case 'A': free(A); A = S;
+					printf("set is A\n"); break;
+		case 'B' : free(B); B = S; break;
+		case 'C' : free(C); C = S; break;
+		case 'D' : free(D); D = S; break;
+		case 'E' : free(E); E = S; break;
+		case 'F' : free(F); F = S; break;
+		default: printf("in read set: no such group as %c\n", setName );
 	}
-			print_set();
-		}
-		if(strcmp(command, "read_set") ==0){
-			read_set(command )
-		}
-		
-	}
-	printf("enter groud for read_set\n");
-	gets(arr);
-	
-	read_set(arr);
-	printf("Got set, now printing it, %d\n", A[0]);
-	print_set(A);
-	
 }
 
-void callFunc()
-
+set charToSet(char set){
+	
+	switch (set){
+			case 'A': return A;
+					
+			case 'B' : return B;
+			case 'C' : return C;
+			case 'D' : return D;
+			case 'E' : return E;
+			case 'F' : return F;
+			default: printf("in char to set - no such group as %c\n",set ); return NULL;
+	}
+}
 void print_set(set S){
-	int i=0;
-	if(S[i] != '\0'){ /*if the set is not empty*/
-		while(S[i] != '\0'){
-			for(i; i<16 && S[i] != '\0'; i++){
-				printf("%d ", S[i] );
+	int i=0, j=0;
+	char mask = 1;
+	int count = 1;
+	if(S != NULL){ /*if the set is not empty*/
+		
+		for(i=0; i<16;i++){
+			
+			mask = 1;
+			/*loops every bit*/
+			for(j=0; j<8; j++){
+				
+				if((S[i]&mask)==mask){
+					printf("%d, ", (i*8)+j);
+					count++;
+				}
+				mask = mask << 1;
 			}
-			printf("\n");
+			
+			if(count>15){
+				printf("\n");
+				count = 0;
+			}
+		
 		}
+	}else{
+		printf("set is empty\n");
 	}
-	
+	printf("\n");
 }
 
-void read_set(char input[]){ /*this function should be changed to work with pointers */
-	int i;
+void read_set(char *input){ /*this function should be changed to work with pointers */
+	int i=0;
 	int var;
-	int k =1;
-	int endOfNum = 1; 
-	set S;
-	int loc =0;
 	
-	printf("%s \n", input+1);
-	for (char *p = strtok((input+1),","); p != NULL; p = strtok(NULL, ",")){
-		/*printf("p is: %s\n", p);*/
+	set S = malloc(16);
+	int loc =0;
+	char mask = 1;
+	char *p;
+	for(i=0; i<16;i+=1){
+		S[i] = 0;
+	}
+	
+	
+	i=0;
+	/*input[11] is were the numbers begin
+	 *input[9] is were the set name is */ 
+	for (p = strtok((input+11),","); p != NULL; p = strtok(NULL, ",")){
+		
 		var = atoi(p);
-		/*printf("var is: %d\n", var);*/
-		S[loc] = var;
+		if(var == -1){
+			break;
+		}
+		printf("var is: %d\n", var);
+		if(var > 127 || var < 0 ){
+			/*printf("%d is out of range\n", var);*/
+			return;
+		}
+		/* the i loc*/
+		loc = var/8;
+		
+		/*printf("loc is: %d, or operator is: %d\n",loc, mask<<(var%8));*/
+		S[loc] = S[loc]|(mask<<(var%8));
 		/*printf("S[loc] is: %d\n", S[loc]);*/
 		loc++;
 	}
-	switch (input[0]){
-		case 'A': strcpy(A, S);
-					printf("set is A\n");
-		case 'B' : strcpy(B, S);
-		case 'C' : strcpy(C, S);
-		case 'D' : strcpy(D, S);
-		case 'E' : strcpy(E, S);
-		case 'F' : strcpy(F, S);
-		case default: printf("no such group as %c\n",input[0] )
+	if(var != -1){
+		printf("Error: a set must end with '-1'\n");
+		return;
 	}
+	assingSet(S, input[9]);
 	
-	/* printf("%d\n", A[0]); */
+	
 }
 
-void union_set(set A, set B, set C){
-	strcat(C, A);
-	strcat(C, B);
+void union_set(set A, set B, char setName){
+	
+	int i=0;
+	set S;
+	if(A ==NULL || B == NULL){
+		printf("one of the grous given as arguments were null\n");
+		return;
+	}
+	printf("freed\n");
+	S = malloc(16);
+	printf("malloced\n");
+	
+	printf("assigned\n");
+	for(i=0; i<16; i++){
+		printf("i: %d\n", i);
+		S[i] = A[i]|B[i];
+	}
+	printf("looped\n");
+	
+	printf("printed\n");
+	assingSet(S, setName);
+}
+void intersect_set(set A, set B, char setName){
+	
+	int i=0;
+	set S;
+	if(A ==NULL || B == NULL){
+		printf("one of the grous given as arguments were null\n");
+		return;
+	}
+	printf("freed\n");
+	S = malloc(16);
+	printf("malloced\n");
+	
+	printf("assigned\n");
+	for(i=0; i<16; i++){
+		
+		S[i] = A[i]&B[i];
+	}
+	printf("looped\n");
+	
+	printf("printed\n");
+	assingSet(S, setName);
 }
 
-void intersect_set(set A, set B, set C){
-	int i, loc = 0;
+void sub_set(set A, set B, char setName){/* maybe needs to be changed */
+	int i=0;
+	set S;
+	if(A ==NULL || B == NULL){
+		printf("one of the grous given as arguments were null\n");
+		return;
+	}
+	printf("freed\n");
+	S = malloc(16);
+	printf("malloced\n");
 	
-	for(i=0; i<strlen(A) && i<strlen(B); i++){
-		if(strchr(A,B[i])){
-			C[loc] = B[i];
-			loc++;
-		}
+	printf("assigned\n");
+	for(i=0; i<16; i++){
+		/*A[i] xor B[i]
+		
+		*/
+		S[i] = A[i]&(~B[i]);
 	}
-}
-
-void sub_set(set A, set B, set C){/* maybe needs to be changed */
-	int i, loc = 0;
+	printf("looped\n");
 	
-	for(i=0; i<strlen(A) && i<strlen(B); i++){
-		if(strchr(B,A[i]) == NULL){
-			C[loc] = B[i];
-			loc++;
-		}
-	}
-	if(strlen(A)>strlen(B)){
-		strcat(C, A+strlen(B));
-	}
+	printf("printed\n");
+	assingSet(S, setName);
 }
 void halt(){
 	bool = 0;
+	free(A);
+	free(B);
+	free(C);
+	free(D);
+	free(E);
+	free(F);
 }
