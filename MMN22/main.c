@@ -1,6 +1,27 @@
 #include "set.h"
 
-int main(){
+#define checkNull(comm) if(comm == NULL){\
+	printf("invalid input\n, wrong number of arguments");\
+	continue;\
+	}
+#define setupFunc() set temp_A, temp_B;\
+			char temp;\
+			command = strtok(NULL, ",");\
+			checkNull(command);\
+			temp_A = charToSet(command[strlen(command)-1]) ;/*command is a string*/\
+			command = strtok(NULL, ",");\
+			checkNull(command);\
+			temp_B = charToSet(command[strlen(command)-1]) ;\
+			command = strtok(NULL, ",");\
+			checkNull(command);\
+			temp =command[strlen(command)-1];\
+			if((command=strtok(NULL, ","))!=NULL){\
+				printf("invalid input, to many arguments\n");\
+				continue;\
+			}
+			
+			
+int main(){ 
 	char input[MAXLENGTH];
 	char *command;
 	char completeInput[MAXLENGTH];
@@ -31,52 +52,21 @@ int main(){
 			
 		}
 		else if(strcmp(command, "union_set")==0){
-			command = strtok(NULL, ",");
-			if(command == NULL){
-				printf("invalid input\n");
-				
-			}else{
-				set temp_A, temp_B;
-				printf("preforming union_set\n");
-				printf("command is:%c\n", command[strlen(command)-1]);
-				temp_A = charToSet(command[strlen(command)-1]) ;/*command is a string*/
-				command = strtok(NULL, ",");
-				printf("command is:%c\n", command[strlen(command)-1]);
-				temp_B = charToSet(command[strlen(command)-1]) ;
-				
-				command = strtok(NULL, ",");
-				printf("command is:%c\n", command[strlen(command)-1]);
-				union_set(temp_A,temp_B, command[strlen(command)-1]);
-			}
+			
+			setupFunc();
+			
+			union_set(temp_A,temp_B,temp);
+			
 		}
 		else if(strcmp(command, "sub_set")==0){
-			command = strtok(NULL, ",");
-			if(command == NULL){
-				printf("invalid input\n");	
-			}else{
-				set temp_A, temp_B;
-				printf("preforming sub_set\n");
-				temp_A = charToSet(command[strlen(command)-1]); /*command is a string*/
-				command = strtok(NULL, ",");
-				temp_B = charToSet(command[strlen(command)-1]); 
-				command = strtok(NULL, ",");
-				sub_set(temp_A,temp_B, command[strlen(command)-1]);
-			}
+			setupFunc();
+			sub_set(temp_A,temp_B,temp);
+			
 		}
 		else if(strcmp(command, "intersect_set")==0){
+			setupFunc();
+			intersect_set(temp_A,temp_B, temp);
 			
-			command = strtok(NULL, ",");
-			if(command == NULL){
-				printf("invalid input\n");	
-			}else{
-				set temp_A, temp_B;
-				printf("preforming intersect_set\n");
-				temp_A = charToSet(command[strlen(command)-1]);
-				command = strtok(NULL, ",");
-				temp_B = charToSet(command[strlen(command)-1]);
-				command = strtok(NULL, ",");
-				intersect_set(temp_A,temp_B, command[strlen(command)-1]);
-			}	
 		}
 		else if(strcmp(command, "halt")==0){
 			bool = 0;

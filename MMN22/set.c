@@ -1,5 +1,23 @@
 #include "set.h"
 
+#define actionOnSet(operator) int i=0;\
+	set S;\
+	if(A ==NULL || B == NULL){\
+		printf("one of the grous given as arguments were null\n");\
+		return;\
+	}\
+	printf("freed\n");\
+	S = malloc(16);\
+	printf("malloced\n");\
+	printf("assigned\n");\
+	for(i=0; i<16; i++){\
+		printf("i: %d\n", i);\
+		S[i] = A[i] operator B[i];\
+	}\
+	printf("looped\n");\
+	printf("printed\n");\
+	assingSet(S, setName);
+
 void assingSet(set S, char setName){
 	switch (setName){
 		case 'A': free(A); A = S;
@@ -74,8 +92,12 @@ void read_set(char *input){ /*this function should be changed to work with point
 	/*input[11] is were the numbers begin
 	 *input[9] is were the set name is */ 
 	for (p = strtok((input+11),","); p != NULL; p = strtok(NULL, ",")){
-		
+		/*change to strtol when i have wifi */
 		var = atoi(p);
+		if(var==0 && p[strlen(p)-1] !='0'){
+				printf("invalid input - %s is not an int\n", p);
+				return;
+		}
 		if(var == -1){
 			break;
 		}
@@ -102,73 +124,17 @@ void read_set(char *input){ /*this function should be changed to work with point
 }
 
 void union_set(set A, set B, char setName){
-	
-	int i=0;
-	set S;
-	if(A ==NULL || B == NULL){
-		printf("one of the grous given as arguments were null\n");
-		return;
-	}
-	printf("freed\n");
-	S = malloc(16);
-	printf("malloced\n");
-	
-	printf("assigned\n");
-	for(i=0; i<16; i++){
-		printf("i: %d\n", i);
-		S[i] = A[i]|B[i];
-	}
-	printf("looped\n");
-	
-	printf("printed\n");
-	assingSet(S, setName);
+	actionOnSet(|);
 }
+
 void intersect_set(set A, set B, char setName){
-	
-	int i=0;
-	set S;
-	if(A ==NULL || B == NULL){
-		printf("one of the grous given as arguments were null\n");
-		return;
-	}
-	printf("freed\n");
-	S = malloc(16);
-	printf("malloced\n");
-	
-	printf("assigned\n");
-	for(i=0; i<16; i++){
-		
-		S[i] = A[i]&B[i];
-	}
-	printf("looped\n");
-	
-	printf("printed\n");
-	assingSet(S, setName);
+	actionOnSet(&);
 }
 
 void sub_set(set A, set B, char setName){/* maybe needs to be changed */
-	int i=0;
-	set S;
-	if(A ==NULL || B == NULL){
-		printf("one of the grous given as arguments were null\n");
-		return;
-	}
-	printf("freed\n");
-	S = malloc(16);
-	printf("malloced\n");
-	
-	printf("assigned\n");
-	for(i=0; i<16; i++){
-		/*A[i] xor B[i]
-		
-		*/
-		S[i] = A[i]&(~B[i]);
-	}
-	printf("looped\n");
-	
-	printf("printed\n");
-	assingSet(S, setName);
+	actionOnSet(&~);
 }
+
 void halt(){
 	bool = 0;
 	free(A);

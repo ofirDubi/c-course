@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAXLENGTH 100
+#define MAXLENGTH 1000
 
 
 typedef char * set;

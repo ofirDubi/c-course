@@ -6,23 +6,13 @@
 	to do that i create a struct.. use malloc
 
 */
+#define act(action) x action y
 typedef char *set;
-set A, B,C;
+
 int main(){
-	if(A==NULL){
-		putchar('k');
-	}
-	free(A);
-	A =  malloc(16);
-	A[0]='a';
-	A[2]='3';
-	B = A;
-	B[0] = '5';
-	C = malloc(1);
+		int x=1, y=2;
 	
-	B = C;
-	C[0] = '3';
-	putchar(A[0]);
-	free(A);
+		printf("%d", act(+));
+	
 	return 0;
 }
