@@ -1,7 +1,10 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define all_types  {1,1,1,1}
 #define not_immediate {0,1,1,1}
-
+typedef bool unsigned short int:1;
 typedef word unsigned short int:15;
 
 struct symbol {
@@ -9,8 +12,9 @@ struct symbol {
 	int address;
 	unsigned int isExternal:1, isCommand:1;
 	};
+enum argument_types {immidiate, direct, reg_index, reg_direct};
 
-struct argument_types {
+struct possible_argument_types {
 	unsigned int immediate:1;
 	unsigned int direct:1;
 	unsigned int reg_index:1;
@@ -19,10 +23,18 @@ struct argument_types {
 struct Command{
 	char * name; 
 	char opcode;
-	unsigned int operands_number:2;
+	unsigned int operand_number:2;
 	struct argument_types first_arg;
 	struct argument_types second_arg;
 };
+
+void addToSymboleTable(char * label, int address, int isExternal, int isCommand)
+int isLabel(char * string);
+void addData(char * token);
+void addString(char * token);
+void writeCommand(struct Command command, char * arguments);
+void adjustSymbols();
+
 
 struct Command machine_commands[16] ={{"mov",0, 2, all_types,not_immediate},
 	{"cmp", 1, 2, all_types, all_types}, {"add",2,2,all_types,not_immediate},
@@ -34,8 +46,9 @@ struct Command machine_commands[16] ={{"mov",0, 2, all_types,not_immediate},
 	{"jsr", 13, 1,not_immediate}, {"rts", 14,0}, {"stop",15,0}
 	
 	};
-int DC, IC
+struct symbol * symbol_table;
+int DC, IC, symbole_table_size=0;
 word * COMMANDS_SEG;
 word * DATA_SEG;
-int isLabel(char * string);
+
 
