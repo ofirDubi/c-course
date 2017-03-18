@@ -80,6 +80,8 @@ firstPass(char * fileName){
 				if(command == NULL){
 					fprintf(stderr, "%s is not a valid command.\n", token);
 				}else{
+					/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
+					/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
 					writeCommand(command, strstr(line, command.name)+strlen(command.name);/*now doing this */
 				}
 				line_part += 2;
@@ -121,12 +123,14 @@ secondPass(FILE * fp){
 				
 			}else if(strcmp(token, ".extern")|| strcmp(token, ".entry")){
 				if(strcmp(token, ".entry")){
-					writeEntry(strtok(NULL, " "));
+					writeEntry(strtok(NULL, " ")); /*TODO*/
 				}else{
 					break;
 				}
 			}else{
-				writeOperands()
+				/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
+				/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
+				writeOperands(strstr(line, command.name)+strlen(command.name))
 			}
 			token = strtok(NULL, " ");
 		}

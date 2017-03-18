@@ -103,10 +103,12 @@ argument_types getArgumentType(char * argument){
 
 void writeCommand(struct Command command, char * arguments){
 	/*check for errors*/ 
-	word command_word
+	word command_word;
+	struct unwritten_argument unwritten_1, unwritten_2;
 	char * first_arg, * second_arg, * thired_arg;
 	int words=0;
 	argument_types arg1, arg2;
+	printf("DEBUG:in writeOperands, arguments are: %s", arguments);
 	first_arg = strtok(arguments, ",");
 	/*using strtok to remove all wihte spaces*/
 	if(command.operand_number == 0 && first_arg != NULL){
@@ -138,19 +140,36 @@ void writeCommand(struct Command command, char * arguments){
 		arg1 = getArgumentType(first_arg);
 		arg2 = getArgumentType(second_arg);
 		if(arg1 == reg_direct && arg2 == reg_direct){
-			word = 1;
+			unwritten_1.type = reg_direct;
 		}else{
-			word = 2;
+			unwritten_1.type = arg1;
+			unwritten_1.argument = first_arg;
+			
+			unwritten_2.type = arg2;
+			unwritten_2.argument = second_arg;
+			words = 2;
 		}
 	}
 	/*  unsuded     group                         opcode         firstArg  */
 	command_word = 7<<12 + command.operand_number<<10 +command.opcode<<6 + arg1<<4 +
-					/*second arg     EAR*/
+					/*second arg     ARE*/
 					arg2<<2       +   0 ;
 	
-	COMMANDS_SEG = realloc(COMMANDS_SEG, sizeof(COMMANDS_SEG) + sizeof(word));
-	COMMANDS_SEG[IC] = command_word;
-	IC += word+1;
+	COMMANDS_SEG = realloc(COMMANDS_SEG, sizeof(COMMANDS_SEG) +
+					sizeof(command_segment_elements) * words);
+	
+	COMMANDS_SEG[IC].command_segment_elements.isWord ==1;
+	COMMANDS_SEG[IC++].command_segment_elements.incoded_word = command_word;
+	if(words >= 1){
+		COMMANDS_SEG[IC++].command_segment_elements.unwrittenArgument= unwritten_1;  
+		
+	}
+	if(word==2){
+		COMMANDS_SEG[IC++].command_segment_elements.unwrittenArgument= unwritten_2;  
+	}
+	
+	
+	 
 }
 void adjustSymbols(){
 	int i;
@@ -161,11 +180,98 @@ void adjustSymbols(){
 	}
 	
 }
+ 
+
+void writeOperands(char * arguments){
+	
+	char * token;
+	
+	printf("DEBUG:in writeOperands, arguments are: %s", arguments);
+	/*now ic points to the command, so we need to increase it*/
+	IC++;
+	if(COMMANDS_SEG[IC++].isWord){
+		return;
+	}else{
+		COMMANDS_SEG[IC++].command_segment_elements.incoded_word = argToWord(COMMANDS_SEG[IC].command_segment_elements.unwrittenArgument)
+	}
+	if(COMMANDS_SEG[IC++].isWord){
+		return;
+	}else{
+		COMMANDS_SEG[IC++].command_segment_elements.incoded_word = argToWord(COMMANDS_SEG[IC].command_segment_elements.unwrittenArgument)
+	}
+	
+		
+}
+
+word argToWord(struct unwritten_argument arg){
+	word incoded_word;
+	switch (arg.type){
+		case immidiate:
+			incoded_word = immidiateToWord(arg.argument);
+			break;
+		case direct:
+			incoded_word = directToWord(arg.argument);
+			break;
+		case reg_direct:/*TODOODODODODOOTODOOD*/
+			incoded_word = regDirectToWord(arg.argument);
+			break;
+		case reg_index:
+			incoded_word = regIndexToWord(arg.argument);
+			break;
+	}
+	
+}
+
+word regIndexToWord(char * arg){
+	int first_reg, second_reg;
+	sscanf(arg, "r%d[r%d]", &first_arg, &second_arg);
+	if(first_reg%2 !=1){
+		fprintf(stderr, "ERROR: first reg in indexing must be uneven, but its: %d \n". first_reg);
+		return 0;
+	}
+	if(second_reg%2 !=0){
+		fprintf(stderr, "ERROR: second reg in indexing must be even, but its: %d \n". second_arg);
+		return 0;
+	}
+	return (word)((first_arg<<2) + (second_arg<<8));
+}
+
+word regDirectToWord(char * arg){
+	
+	
+}
 
 
+word directToWord(char * arg){
+	struct symbol current_symbol = getSymbol(arg);
+	
+	if(current_symbol.isExternal){
+		return 1; /*translates to 0000000000000-01*/
+	}
+	if(current_symbol.isCommand){
+		fprintf(stderr, "ERROR: cant use a command (%s) as an operand for a command\n", arg);
+		return 0;
+	}
+	return (word)((current_symbol.address<<2) + 2);/*for A R E*/
+	
+}
 
-
-
+word immidiateToWord(char * arg){
+	char * token = strtok(arg, '#');
+	int temp;
+	if(temp= atoi(token)){ /*there may or may not be spaces before the '#'*/
+		printf("DEBUG: SPACES BEFORE '#' \n");
+		
+	}else{
+		token =  strtok(NULL, '#');
+		temp = temp= atoi(token);
+	}
+	if(temp<0){
+			temp = ~temp;
+	}
+	temp = (temp<<2);
+	return temp;
+}
 
 
 

@@ -6,13 +6,26 @@
 #define not_immediate {0,1,1,1}
 typedef bool unsigned short int:1;
 typedef word unsigned short int:15;
+enum argument_types {immidiate, direct, reg_index, reg_direct};
+
+struct unwritten_argument{
+	argument_types type;
+	char * argument;
+};
+struct command_segmet_rapper{
+	unsigned int isWord:1=0; /*tagged union*/
+	union command_segment_elements{
+		struct unwritten_argument unwrittenArgument;
+		word incoded_word;
+	};
+}
 
 struct symbol {
 	char * label;
 	int address;
 	unsigned int isExternal:1, isCommand:1;
 	};
-enum argument_types {immidiate, direct, reg_index, reg_direct};
+
 
 struct possible_argument_types {
 	unsigned int immediate:1;
@@ -48,7 +61,7 @@ struct Command machine_commands[16] ={{"mov",0, 2, all_types,not_immediate},
 	};
 struct symbol * symbol_table;
 int DC, IC, symbole_table_size=0;
-word * COMMANDS_SEG;
+struct command_segmet_rapper * COMMANDS_SEG;
 word * DATA_SEG;
 
 
