@@ -140,7 +140,7 @@ void writeCommand(struct Command command, char * arguments){
 		arg1 = getArgumentType(first_arg);
 		arg2 = getArgumentType(second_arg);
 		if(arg1 == reg_direct && arg2 == reg_direct){
-			unwritten_1.type = reg_direct;
+			unwritten_1.type = doube_reg_direct;
 		}else{
 			unwritten_1.type = arg1;
 			unwritten_1.argument = first_arg;
@@ -185,19 +185,26 @@ void adjustSymbols(){
 void writeOperands(char * arguments){
 	
 	char * token;
-	
+	/*TODO: change things with reg_direct!!!*/
 	printf("DEBUG:in writeOperands, arguments are: %s", arguments);
 	/*now ic points to the command, so we need to increase it*/
 	IC++;
 	if(COMMANDS_SEG[IC++].isWord){
 		return;
 	}else{
-		COMMANDS_SEG[IC++].command_segment_elements.incoded_word = argToWord(COMMANDS_SEG[IC].command_segment_elements.unwrittenArgument)
+		word temp = argToWord(COMMANDS_SEG[IC].command_segment_elements.unwrittenArgument);
+		if(COMMANDS_SEG[IC].command_segment_elements.incoded_word.type == reg_direct){
+			temp = (temp<<6); /*adjusting the word acording to the rules*/
+		}
+		COMMANDS_SEG[IC].command_segment_elements.incoded_word = temp;
+		
+		IC++;
 	}
 	if(COMMANDS_SEG[IC++].isWord){
 		return;
 	}else{
-		COMMANDS_SEG[IC++].command_segment_elements.incoded_word = argToWord(COMMANDS_SEG[IC].command_segment_elements.unwrittenArgument)
+		COMMANDS_SEG[IC].command_segment_elements.incoded_word = argToWord(COMMANDS_SEG[IC].command_segment_elements.unwrittenArgument);
+		IC++;
 	}
 	
 		
@@ -212,14 +219,20 @@ word argToWord(struct unwritten_argument arg){
 		case direct:
 			incoded_word = directToWord(arg.argument);
 			break;
-		case reg_direct:/*TODOODODODODOOTODOOD*/
+		case reg_direct:
 			incoded_word = regDirectToWord(arg.argument);
 			break;
 		case reg_index:
 			incoded_word = regIndexToWord(arg.argument);
 			break;
+		case double_reg_direct:
+			incoded_word = doubleRegDirectToWord(arg.argument);
 	}
 	
+}
+
+word doubleRegDirectToWord(char * arg){
+	return regDirectToWord(strtok(arg, ",")) <<8 + regDirectToWord(strtok(NULL, ","))<<2;
 }
 
 word regIndexToWord(char * arg){
@@ -237,7 +250,16 @@ word regIndexToWord(char * arg){
 }
 
 word regDirectToWord(char * arg){
-	
+	char * token;
+	int reg_num;
+	/*using strtok to remove all wihte spaces*/
+	token = strtok(arg, " ");
+	sscanf(token, "r%d", &reg_num);
+	if(reg_num<0 || reg_num > 7){
+		fprintf(stderr, "ERROR: there are only 8 registers, r0-r7. register number: %d is invalid\n", reg_num);
+		return (word)0;
+	}
+	return (word) reg_num<<2;
 	
 }
 
@@ -246,6 +268,7 @@ word directToWord(char * arg){
 	struct symbol current_symbol = getSymbol(arg);
 	
 	if(current_symbol.isExternal){
+		writeExternal(current_symbol);
 		return 1; /*translates to 0000000000000-01*/
 	}
 	if(current_symbol.isCommand){
@@ -275,6 +298,14 @@ word immidiateToWord(char * arg){
 
 
 
+void writeExternal(struct symbol current_symbol){
+	static struct external * externList;
+	static int external_size = 0;
+	externList = realloc(externList, sizeof(struct external));
+	externList[external_size].current_symbol = current_symbol;
+	externList[external_size].line = IC;
+	external_size++;
+}
 
 
 

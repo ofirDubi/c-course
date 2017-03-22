@@ -6,7 +6,8 @@
 #define not_immediate {0,1,1,1}
 typedef bool unsigned short int:1;
 typedef word unsigned short int:15;
-enum argument_types {immidiate, direct, reg_index, reg_direct};
+enum argument_types {immidiate, direct, reg_index, reg_direct, double_reg_direct }; /*double_reg_direct is for when both operands  are 
+																					reg_direct */
 
 struct unwritten_argument{
 	argument_types type;
@@ -24,8 +25,12 @@ struct symbol {
 	char * label;
 	int address;
 	unsigned int isExternal:1, isCommand:1;
-	};
+};
 
+struct external{
+	struct symbol current_symbol;
+	int line;
+}
 
 struct possible_argument_types {
 	unsigned int immediate:1;
@@ -47,7 +52,7 @@ void addData(char * token);
 void addString(char * token);
 void writeCommand(struct Command command, char * arguments);
 void adjustSymbols();
-
+void writeExternal(struct symbol current_symbol);
 
 struct Command machine_commands[16] ={{"mov",0, 2, all_types,not_immediate},
 	{"cmp", 1, 2, all_types, all_types}, {"add",2,2,all_types,not_immediate},

@@ -1,18 +1,14 @@
 #include <stdio.h>
-#include <string.h>
-
+#include<string.h>
+#include<stdlib.h>
 int main(){
-	char s[100];
-	char * token;
-	gets(s);
-	token = strtok(s, " ");
-	while(token!=NULL){
-		printf("%s\n", token);
-		
-		
-		
-		token = strtok(NULL, " ");
-	}
+	static char *k;
+	k = realloc(k, 10);
+	strcpy(k, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak");
+	
+
+	
+	printf(k);
 	return 1;
 }
 
