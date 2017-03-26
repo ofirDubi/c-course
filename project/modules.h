@@ -84,19 +84,8 @@ void writeExternal(struct symbol current_symbol);
 
 void writeEntry(char * arg);
 
-static struct Command machine_commands[16] = { { "mov",0, 2, all_types,not_immediate },
-{ "cmp", 1, 2, all_types, all_types },{ "add",2,2,all_types,not_immediate },
-{ "sub",3,2,all_types,not_immediate },{ "not",4,1,not_immediate },
-{ "clr",5,1, not_immediate },{ "lea",6,2,{ 0,1,1,0 },not_immediate },
-{ "inc",7,1,not_immediate },{ "dec", 8, 1, not_immediate },
-{ "jmp",9,1,not_immediate },{ "bne", 10, 1, not_immediate },
-{ "red", 11, 1, not_immediate },{ "prn", 12, 1, all_types },
-{ "jsr", 13, 1,not_immediate },{ "rts", 14,0 },{ "stop",15,0 }
 
-};
 static int error = 0;
-
-static struct symbol * symbol_table = NULL;
 static int DC, IC, symbole_table_size = 0;
 static struct command_segmet_rapper * COMMAND_SEG=NULL;
 static word * DATA_SEG = NULL;

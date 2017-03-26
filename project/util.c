@@ -1,26 +1,41 @@
 #include "modules.h"
 #include <ctype.h>
-#define arrayRealloc(array, size) {\
+#define arrayRealloc(array,array_size, size) {\
 	if(*array ==NULL){\
 		printf("____mallocing the first time____\n");\
 		*array = malloc(size);\
 	}else{\
 	printf("____reallocing____\n");\
-		*array = realloc(*array, sizeof(*array) +size);\
+	*array = realloc(*array, (array_size)+(size));\
+	printf("done reallocing\n");\
 	}\
 }
 	
-void arrayReallocs(struct command_segmet_rapper **array,size_t size){
+static struct Command machine_commands[16] = { { "mov",0, 2, all_types,not_immediate },
+{ "cmp", 1, 2, all_types, all_types },{ "add",2,2,all_types,not_immediate },
+{ "sub",3,2,all_types,not_immediate },{ "not",4,1,not_immediate },
+{ "clr",5,1, not_immediate },{ "lea",6,2,{ 0,1,1,0 },not_immediate },
+{ "inc",7,1,not_immediate },{ "dec", 8, 1, not_immediate },
+{ "jmp",9,1,not_immediate },{ "bne", 10, 1, not_immediate },
+{ "red", 11, 1, not_immediate },{ "prn", 12, 1, all_types },
+{ "jsr", 13, 1,not_immediate },{ "rts", 14,0 },{ "stop",15,0 }
+
+};
+void arrayReallocs(struct command_segmet_rapper ** array,size_t array_size,size_t size) {
+void arrayReallocs(struct command_segmet_rapper ** array,size_t array_size,size_t size) {
 	if(*array ==NULL){
 		printf("____mallocing the first time____\n");
 		*array = malloc(size);
 	}else{
 	printf("____reallocing____\n");
-		*array = realloc(*array, sizeof(*array) +size);
+	*array = realloc(*array, (array_size)+(size));
+	printf("done reallocing\n");
 	}
-	
 }
-	
+
+static struct symbol * symbol_table = NULL;
+
+
 struct Command * getCommand(char * string) {
 	int i;
 	for (i = 0; i<16; i++) {
@@ -62,7 +77,7 @@ void addToSymboleTable(char * label, int address, int isExternal, int isCommand)
 		error = 1;
 		return;
 	}
-	arrayRealloc(&symbol_table, (sizeof(symbol_table) + sizeof(struct symbol)));
+	arrayRealloc(&symbol_table,sizeof(struct symbol)*symbole_table_size , sizeof(struct symbol));
 	
 	if (label[strlen(label) - 2] == ':') {
 		label[strlen(label) - 2] = '\0'; /*removes the ':' from the label*/
@@ -86,12 +101,12 @@ void addString(char * token) {
 		return;
 	}
 	for (i = 1; i < (strlen(token) - 1); i++) {
-		arrayRealloc(&DATA_SEG, (sizeof(DATA_SEG) + sizeof(word)));
+		arrayRealloc(&DATA_SEG, sizeof(DC) * sizeof(word), sizeof(word));
 		
 		DATA_SEG[DC].content = token[i];
 		DC++;
 	}
-	arrayRealloc(&DATA_SEG, (sizeof(DATA_SEG) + sizeof(word)));
+	arrayRealloc(&DATA_SEG, sizeof(DC) * sizeof(word), sizeof(word));
 	DATA_SEG[DC].content = 0; /*end of string*/
 	DC++;
 
@@ -102,7 +117,7 @@ void addData(char * token) {
 	token = strtok(token, ",");
 	while (token != NULL) {
 		num.content = strtol(token, NULL, 10); /*add check for wrong numbers*/
-		arrayRealloc(&DATA_SEG, (sizeof(DATA_SEG) + sizeof(word)));
+		arrayRealloc(&DATA_SEG, sizeof(DC) * sizeof(word), sizeof(word));
 		DATA_SEG[DC].content = num.content;
 		DC++;
 		token = strtok(NULL, ",");
@@ -148,7 +163,7 @@ void writeCommand(struct Command command, char * arguments) {
 		error = 1;
 		return;
 	}
-	printf("first arg finished, ");
+	printf("first arg finished(%s), ",first_arg);
 	second_arg = strtok(NULL, ",");
 	if (command.operand_number == 1 && second_arg != NULL) {
 		fprintf(stderr, "ERROR: trying to pass second argument '%s' to a command that takes 1 \
@@ -156,7 +171,7 @@ void writeCommand(struct Command command, char * arguments) {
 		error = 1;
 		return;
 	}
-	printf("second arg finishd, ");
+	printf("second arg finishd(%s), ", second_arg);
 	if ((thired_arg = strtok(NULL, ",")) != NULL) {
 		fprintf(stderr, "ERROR: trying to pass thired argument '%s' to a command that takes 2 \
 			arguments (%s)\n", thired_arg, command.name);
@@ -192,8 +207,8 @@ void writeCommand(struct Command command, char * arguments) {
 	command_word.content = (7 << 12) + (command.operand_number << 10) + (command.opcode << 6) + (arg1 << 4) +
 		/*second arg     ARE*/
 		(arg2 << 2);
-	printf("word calculated(%d), size of arr is %d ", words,(int) sizeof(COMMAND_SEG));
-	arrayReallocs(&COMMAND_SEG , (sizeof(struct command_segmet_rapper) * words));
+	printf("word calculated(%d), size of arr is %d ", words,(int)(sizeof(struct command_segmet_rapper)*IC + sizeof(struct command_segmet_rapper) * words));
+	arrayReallocs(&COMMAND_SEG , sizeof(struct command_segmet_rapper)*IC,sizeof(struct command_segmet_rapper) * words);
 
 	printf("memory allocated, ");
 	if(COMMAND_SEG == NULL){
@@ -368,7 +383,7 @@ word immidiateToWord(char * arg) {
 
 void writeExternal(struct symbol current_symbol) {
 
-	arrayRealloc(&externList, sizeof(struct external));
+	arrayRealloc(&externList,sizeof(struct external)* external_size,sizeof(struct external));
 	
 	externList[external_size].current_symbol = current_symbol;
 	externList[external_size].line = IC;
@@ -376,7 +391,7 @@ void writeExternal(struct symbol current_symbol) {
 }
 
 void writeEntry(char * arg) {
-	arrayRealloc(&entryList, sizeof(struct external));
+	arrayRealloc(&entryList,sizeof(struct external)* external_size,sizeof(struct external));
 	entryList[entry_size].current_symbol = *getSymbol(arg);
 	entryList[entry_size].line = entryList[entry_size].current_symbol.address;
 	entry_size++;
