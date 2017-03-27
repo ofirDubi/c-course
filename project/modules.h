@@ -85,13 +85,13 @@ void writeExternal(struct symbol current_symbol);
 void writeEntry(char * arg);
 
 
-static int error = 0;
-static int DC, IC, symbole_table_size = 0;
-static struct command_segmet_rapper * COMMAND_SEG=NULL;
-static word * DATA_SEG = NULL;
-static struct external * externList = NULL;
-static int external_size = 0;
+extern int error;
+extern int DC, IC, symbole_table_size;
+extern struct command_segmet_rapper * COMMAND_SEG;
+extern word * DATA_SEG;
+extern struct external * externList;
+extern int external_size;
 
-static struct external * entryList = NULL;
-static int entry_size = 0;
+extern struct external * entryList;
+extern int entry_size;
 

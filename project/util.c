@@ -1,14 +1,11 @@
 #include "modules.h"
 #include <ctype.h>
 #define arrayRealloc(array,array_size, size) {\
-	if(*array ==NULL){\
-		printf("____mallocing the first time____\n");\
-		*array = malloc(size);\
-	}else{\
+\
 	printf("____reallocing____\n");\
 	*array = realloc(*array, (array_size)+(size));\
 	printf("done reallocing\n");\
-	}\
+	\
 }
 	
 static struct Command machine_commands[16] = { { "mov",0, 2, all_types,not_immediate },
@@ -21,19 +18,16 @@ static struct Command machine_commands[16] = { { "mov",0, 2, all_types,not_immed
 { "jsr", 13, 1,not_immediate },{ "rts", 14,0 },{ "stop",15,0 }
 
 };
-void arrayReallocs(struct command_segmet_rapper ** array,size_t array_size,size_t size) {
-void arrayReallocs(struct command_segmet_rapper ** array,size_t array_size,size_t size) {
-	if(*array ==NULL){
-		printf("____mallocing the first time____\n");
-		*array = malloc(size);
-	}else{
+static struct symbol * symbol_table = NULL;
+void arrayReallocs(struct command_segmet_rapper ** array,size_t size) {
+	
 	printf("____reallocing____\n");
-	*array = realloc(*array, (array_size)+(size));
+	*array = realloc(*array, (size));
 	printf("done reallocing\n");
-	}
+	
 }
 
-static struct symbol * symbol_table = NULL;
+
 
 
 struct Command * getCommand(char * string) {
@@ -146,17 +140,25 @@ enum argument_types getArgumentType(char * argument) {
 
 }
 
-
 void writeCommand(struct Command command, char * arguments) {
 	/*check for errors*/
+	
 	word command_word;
 	struct unwritten_argument unwritten_1, unwritten_2;
 	char * first_arg, *second_arg, *thired_arg;
+	
 	int words = 0;
+	
 	enum argument_types arg1, arg2;
+	printf("WTFFF\n");
+	if(arguments == NULL){
+		printf("im fcked\n");
+	}else
 	printf("DEBUG:in writeCommand, arguments are: %s", arguments);
+	
 	first_arg = strtok(arguments, ",");
 	/*using strtok to remove all wihte spaces*/
+	
 	if (command.operand_number == 0 && first_arg != NULL) {
 		fprintf(stderr, "ERROR: trying to pass argument '%s' to a command that doesn't takes \
 			arguments (%s)\n", first_arg, command.name);
@@ -202,28 +204,36 @@ void writeCommand(struct Command command, char * arguments) {
 			words = 2;
 		}
 	}
+	
 	printf("words needed finished, ");
 	/*  unsuded     group                         opcode         firstArg  */
 	command_word.content = (7 << 12) + (command.operand_number << 10) + (command.opcode << 6) + (arg1 << 4) +
 		/*second arg     ARE*/
 		(arg2 << 2);
-	printf("word calculated(%d), size of arr is %d ", words,(int)(sizeof(struct command_segmet_rapper)*IC + sizeof(struct command_segmet_rapper) * words));
-	arrayReallocs(&COMMAND_SEG , sizeof(struct command_segmet_rapper)*IC,sizeof(struct command_segmet_rapper) * words);
-
+	printf("in writeCommand, IC is: %d\n", IC);	
+	printf("word calculated(%d), size of arr is %d ", words,(int)(sizeof(struct command_segmet_rapper)*(IC) + sizeof(struct command_segmet_rapper) * words));
+	arrayReallocs(&COMMAND_SEG , (int)(sizeof(struct command_segmet_rapper)*(IC) + sizeof(struct command_segmet_rapper) * (words+10)));
+	
 	printf("memory allocated, ");
 	if(COMMAND_SEG == NULL){
 		fprintf(stderr,"ERROR: realloc failed");
 		exit(1);
-	}
+	}/*clear*/
+	
 	COMMAND_SEG[IC].isWord = 1;
-	COMMAND_SEG[IC++].command_segment_elements.incoded_word = command_word;
+	COMMAND_SEG[IC++ ].command_segment_elements.incoded_word = command_word;
+	
 	if (words >= 1) {
-		COMMAND_SEG[IC++].command_segment_elements.unwrittenArgument = unwritten_1;
+		COMMAND_SEG[IC++ ].command_segment_elements.unwrittenArgument = unwritten_1;
 
 	}
+
+	
 	if (words == 2) {
-		COMMAND_SEG[IC++].command_segment_elements.unwrittenArgument = unwritten_2;
+		COMMAND_SEG[IC++ ].command_segment_elements.unwrittenArgument = unwritten_2;
 	}
+	
+
 	printf("done.\n");
 
 
@@ -386,12 +396,23 @@ void writeExternal(struct symbol current_symbol) {
 	arrayRealloc(&externList,sizeof(struct external)* external_size,sizeof(struct external));
 	
 	externList[external_size].current_symbol = current_symbol;
-	externList[external_size].line = IC;
+	externList[external_size].line = IC+100;
 	external_size++;
 }
-
+void printSymboles(){
+	int i;
+	printf("***********DEBUG: printing symbole table***********\n");
+	for(i=0; i<symbole_table_size; i++){
+		printf("%s,",symbol_table[i].label);
+	}
+	printf("\n***********DEBUG: done printing symbole table***********\n");
+}
 void writeEntry(char * arg) {
-	arrayRealloc(&entryList,sizeof(struct external)* external_size,sizeof(struct external));
+	
+	arrayRealloc(&entryList,sizeof(struct external)* entry_size,sizeof(struct external));
+	printf("malloced successaafaf\n");
+	printf("arg is: %s", arg);
+	printSymboles();
 	entryList[entry_size].current_symbol = *getSymbol(arg);
 	entryList[entry_size].line = entryList[entry_size].current_symbol.address;
 	entry_size++;

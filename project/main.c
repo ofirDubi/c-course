@@ -5,10 +5,22 @@ void firstPass(char * fileName);
 void secondPass(FILE * fp);
 void writeToFiles(char * fileName);
 void reset();
+
 enum linePart { label_part, commandOrDecleration, arguments };
+
+int error = 0, DC = 0, IC = 0, symbole_table_size = 0;
+struct command_segmet_rapper * COMMAND_SEG = NULL;
+word * DATA_SEG = NULL;
+struct external * externList = NULL;
+int external_size = 0;
+struct external * entryList = NULL;
+int entry_size = 0;
+
+
 int main(int argc, char *argv[]) {
 	printf("name is %s\n", argv[1]);
 	while (--argc != 0) {
+		
 		firstPass(argv[argc]);
 
 		reset();
@@ -18,19 +30,20 @@ int main(int argc, char *argv[]) {
 }
 
 void firstPass(char * fileName) {
-	
+
 	enum linePart line_part;
 	char line[80], *token;
+	char strtok_line[80];
 	FILE * fp;
 	int hasLabel;
-	
+
 	fp = fopen(fileName, "r");
-	if(fp == NULL){
+	if (fp == NULL) {
 		fprintf(stderr, "ERROR: wrong file name, pregram termitating.\n");
 		exit(1);
 	}
 	DC = 0;
-	IC = 100;
+	IC = 0;
 	printf("first round initialisation complete. \n");
 	while (fgets(line, 80, fp)) { /*start looking at a new line*/
 		
@@ -38,13 +51,14 @@ void firstPass(char * fileName) {
 		line_part = label_part;
 		hasLabel = 0;
 		printf("starting a new line: \" %s \" \n", line);
-		token = strtok(line, " ");
-
+		strcpy(strtok_line, line);
+		token = strtok(strtok_line, " ");
+		printf("now line is: %s\n", line);
 		if (token[0] == ';') { /*if the line is a comment*/
 			continue;
 		}
 
-		if (isLabel(token)==1) {
+		if (isLabel(token)) {
 			hasLabel = 1;
 			label = token;
 
@@ -52,27 +66,27 @@ void firstPass(char * fileName) {
 			printf("DEBUG: check label, label is: %s\n", label);
 		}
 		line_part++;
-	
+
 		while (token != NULL) {/*look at a new part of the line*/
 							   /*check instructions*/
 			printf("analysing line: \"%s\" \n", token);
-		
+
 			if (line_part >= 3) {
-				
+
 				fprintf(stderr, "ERROR: unexpected symbol: %s\n", token);
 
 				error = 1;
 				token = strtok(NULL, " ");
 				continue;
 			}
-			
-			if (strcmp(token, ".data")==0 || strcmp(token, ".string")==0) {
-				
+
+			if (strcmp(token, ".data") == 0 || strcmp(token, ".string") == 0) {
+				printf("line is a data or string");
 				if (hasLabel) { /*insert to symbol_table*/
 					addToSymboleTable(label, DC, 0, 0);
 					hasLabel = 0;
 				}
-				if (strcmp(token, ".data")==0) {
+				if (strcmp(token, ".data") == 0) {
 					addData(strstr(line, ".data") + 5);/*5 - the length of .data*/
 				}
 				else {
@@ -80,18 +94,19 @@ void firstPass(char * fileName) {
 				}
 				line_part += 2;
 			}
-			
-			else if (strcmp(token, ".extern")==0 || strcmp(token, ".entry")==0) {
-				
+
+			else if (strcmp(token, ".extern") == 0 || strcmp(token, ".entry") == 0) {
+				printf("looking into and entry or an extern\n");
 				if (hasLabel) {
 					fprintf(stderr, "WARNING: .extern and .entery dont need labels\n");
 
 					hasLabel = 0;
 				}
-				if (strcmp(token, ".extern")==0) {
+				if (strcmp(token, ".extern") == 0) {
 					addToSymboleTable(strtok(NULL, " "), 0, 1, 0);
 
-				}else{
+				}
+				else {
 					token = strtok(NULL, " ");
 				}
 				line_part += 2;
@@ -99,13 +114,14 @@ void firstPass(char * fileName) {
 			/*check commands*/
 			
 			else {
-				
+
 				struct Command * command = getCommand(token);
 				
+				printf("checking for commands\n");
 				if (hasLabel) {
 					printf("adding label\n");
-					addToSymboleTable(label, IC, 0, 0);
-					
+					addToSymboleTable(label, IC+100, 0, 0);
+					printf("command label added\n");
 				}
 
 				if (command == NULL) {
@@ -116,8 +132,9 @@ void firstPass(char * fileName) {
 					/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
 					/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
 					
-					writeCommand(*command, strtok(NULL, " "));/*now doing this */
+					printf("writing command, ");
 					
+					writeCommand(*command, strstr(line, command->name) + strlen(command->name));/*now doing this */
 				}
 				line_part += 2;
 			}
@@ -133,15 +150,18 @@ void firstPass(char * fileName) {
 }
 
 void secondPass(FILE * fp) {
+	
 	char line[80], *token;
+	char strtok_line[80];
 	enum linePart line_part;
 	rewind(fp);
 	while (fgets(line, 80, fp)) { /*start looking at a new line*/
 		char * label; /*in case their is a label*/
-
+		printf("starting a new line: \" %s \" \n", line);
 
 		line_part = label_part;
-		token = strtok(line, " ");
+		strcpy(strtok_line, line);
+		token = strtok(strtok_line, " ");
 
 		if (token[0] == ';') { /*if the line is a comment*/
 			continue;
@@ -155,12 +175,13 @@ void secondPass(FILE * fp) {
 		line_part++;
 
 		while (token != NULL) {/*look at a new part of the line*/
-			if (strcmp(token, ".data")==0 || strcmp(token, ".string")==0) {
+			if (strcmp(token, ".data") == 0 || strcmp(token, ".string") == 0) {
 				continue;
 
 			}
-			else if (strcmp(token, ".extern")==0 || strcmp(token, ".entry")==0) {
-				if (strcmp(token, ".entry")==0) {
+			else if (strcmp(token, ".extern") == 0 || strcmp(token, ".entry") == 0) {
+				if (strcmp(token, ".entry") == 0) {
+					printf("writing entry\n");
 					writeEntry(strtok(NULL, " ")); /*TODO*/
 				}
 				else {
@@ -176,6 +197,7 @@ void secondPass(FILE * fp) {
 				else {
 					/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
 					/*CHANGE THE ARGUMENT TO SOMTHING THAT WORKS FOR SURE*/
+					printf("writing operands\n");
 					writeOperands(strstr(line, command->name) + strlen(command->name));
 				}
 			}
@@ -217,11 +239,11 @@ void writeToFiles(char * fileName) {
 	/*write to obj*/
 	fprintf(fp_obj, "Base 16    Base 16\nAddress    Machine-Code\n");
 	fprintf(fp_obj, "        %d  %d\n\n", IC, DC);
-	for (i = 100; i<IC; i++) {
-		fprintf(fp_obj, "%X      %x\n", i, COMMAND_SEG[i].command_segment_elements.incoded_word.content);
+	for (i = 0; i<IC; i++) {
+		fprintf(fp_obj, "%X      %x\n", i+100, COMMAND_SEG[i].command_segment_elements.incoded_word.content);
 	}
 	for (i = IC; i<IC + DC; i++) {
-		fprintf(fp_obj, "%X      %x\n", i,
+		fprintf(fp_obj, "%X      %x\n", i+100,
 			DATA_SEG[i].content);
 	}
 	printf("DONE!!!");
