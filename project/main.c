@@ -1,5 +1,16 @@
-#include "modules.h"
+/*
+*author - Ofir Dubi
+*
+*Date - 2/4/2017
+*
+*Description - This is the main file of the C assembler project.
+*				it turns assembly files into machine code.
+*
+*Note: The assembler accepts upper case commands and instructions.
+*/
 
+
+#include "modules.h"
 
 void firstPass(char * fileName);
 void secondPass(FILE * fp);
