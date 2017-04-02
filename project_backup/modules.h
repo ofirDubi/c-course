@@ -1,37 +1,45 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
-#include <string.h> /*also contains string.h*/
 
-#define all_types  {1,1,1,1} /*used to initialize the command list*/
+#define all_types  {1,1,1,1}
 #define not_immediate {0,1,1,1}
+
+#define freeArray(array){\
+	int i;\
+	for(i=0; i<symbole_table_size; i++){\
+		free(array[i]);\
+	}\
+	free(array);\
+}
+
 
 typedef struct word {
 	unsigned  int content : 15;
 } word;
-enum argument_types { immediate, direct, reg_index, reg_direct, double_reg_direct }; /*double_reg_direct is for when both operands are
-					reg_direct - they fit into one word*/
+enum argument_types { immidiate, direct, reg_index, reg_direct, double_reg_direct }; /*double_reg_direct is for when both operands  are
+																					 reg_direct */
 
-struct unwritten_argument {/*place holder for operands*/
-	int line; /*used mostly for errors*/
+struct unwritten_argument {
 	enum argument_types type;
 	char argument[20];
 };
 
-struct command_segmet_rapper { /*the code that will be written in obj*/
-	unsigned int isWord : 1; /*tagged struct*/
-	struct command_segment_elements {
+struct command_segmet_rapper {
+	unsigned int isWord : 1; /*tagged union*/
+	union command_segment_elements {
 		struct unwritten_argument unwrittenArgument;
 		word incoded_word;
 	}command_segment_elements;
 };
 
-struct symbol { /*a structure for labels*/
+struct symbol {
 	char label[20];
 	int address;
 	unsigned int isExternal : 1, isCommand : 1;
 };
 
-struct external { /*a structure for the extern and entry file*/
+struct external {
 	struct symbol current_symbol;
 	int line;
 };
@@ -42,8 +50,7 @@ struct possible_argument_types {
 	unsigned int reg_index : 1;
 	unsigned int reg_direct : 1;
 };
-struct Command { /*a structure for commands*/
-	
+struct Command {
 	char * name;
 	char opcode;
 	unsigned int operand_number : 2;
@@ -51,12 +58,12 @@ struct Command { /*a structure for commands*/
 	struct possible_argument_types second_arg;
 };
 
-/*function declerations */
+
 struct symbol * getSymbol(char * label);
 
 struct Command * getCommand(char * string);
 
-void addToSymbolTable(char * label, int address, int isExternal, int isCommand);
+void addToSymboleTable(char * label, int address, int isExternal, int isCommand);
 
 int isLabel(char * string);
 
@@ -70,7 +77,7 @@ word regDirectToWord(char * arg);
 
 word directToWord(char * arg);
 
-word immediateToWord(char * arg);
+word immidiateToWord(char * arg);
 
 void addData(char * token);
 
@@ -86,26 +93,11 @@ void writeExternal(struct symbol current_symbol);
 
 void writeEntry(char * arg);
 
-void printData();
+void utilReset();
 
-void clearSpaces();
 
-void strToUpper(char * str);
-
-void tabsToSpaces(char * str);
-void strToLower(char * str);
-
-char * trimSpaces(char * str);
-
-int subsequentChar(char * str, char mark);
-
-/*global variable declerations*/
-
-extern int error; /*if an error acurs during the compilation, the value of	
-					error will be 1*/
-					
-		/*DC - data countre, IC - instractions counter, line_num - the current line in code (used for errors)*/			
-extern int DC, IC, symbol_table_size, line_num;
+extern int error;
+extern int DC, IC, symbole_table_size;
 extern struct command_segmet_rapper * COMMAND_SEG;
 extern word * DATA_SEG;
 extern struct external * externList;
@@ -114,4 +106,3 @@ extern int external_size;
 extern struct external * entryList;
 extern int entry_size;
 
-extern int max_IC;/*the number of command words in the obj file*/
